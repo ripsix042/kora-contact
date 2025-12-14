@@ -1,7 +1,10 @@
 // Load environment variables FIRST
-// Load .env.production if NODE_ENV is production, otherwise load .env
-const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env';
-require('dotenv').config({ path: envFile });
+// In production (Render), use environment variables from platform
+// In development, load from .env file
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config({ path: '.env' });
+}
+// In production, environment variables are set by Render, no need to load .env file
 
 const app = require('./app');
 const mongoose = require('mongoose');
@@ -11,10 +14,18 @@ const MONGODB_URI = process.env.MONGODB_URI;
 
 // Validate required environment variables
 if (!MONGODB_URI) {
-  console.error('ERROR: MONGODB_URI is not defined in .env file');
-  console.error('Please create a .env file from .env.example and add your MongoDB connection string');
+  console.error('ERROR: MONGODB_URI is not defined');
+  if (process.env.NODE_ENV === 'production') {
+    console.error('Please set MONGODB_URI in Render environment variables');
+  } else {
+    console.error('Please create a .env file from .env.example and add your MongoDB connection string');
+  }
   process.exit(1);
 }
+
+// Log connection info (hide password for security)
+const maskedUri = MONGODB_URI.replace(/:[^:@]+@/, ':****@');
+console.log('MongoDB URI (masked):', maskedUri);
 
 // MongoDB Connection
 mongoose
@@ -25,7 +36,15 @@ mongoose
   })
   .catch((error) => {
     console.error('MongoDB connection error:', error.message);
-    console.error('Check your MONGODB_URI in .env file');
+    if (process.env.NODE_ENV === 'production') {
+      console.error('Check your MONGODB_URI in Render environment variables');
+      console.error('Also verify:');
+      console.error('1. MongoDB Atlas Network Access allows 0.0.0.0/0 or Render IPs');
+      console.error('2. Database user password is correct');
+      console.error('3. Connection string includes database name: /koracontacthub');
+    } else {
+      console.error('Check your MONGODB_URI in .env file');
+    }
     process.exit(1);
   });
 
