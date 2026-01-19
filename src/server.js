@@ -80,12 +80,24 @@ const startServer = async () => {
 
     // Connect to databases
     await connectDB();
-    await connectRedis();
+    
+    // Redis is optional - don't crash if it fails
+    try {
+      await connectRedis();
+    } catch (error) {
+      console.warn('⚠️  Redis connection failed - continuing without background jobs');
+    }
 
-    // Start background workers
-    startContactSyncWorker();
-    startDeviceSyncWorker();
-    console.log('Background workers started');
+    // Start background workers (only if Redis is available)
+    if (process.env.REDIS_HOST) {
+      const contactWorker = startContactSyncWorker();
+      const deviceWorker = startDeviceSyncWorker();
+      if (contactWorker && deviceWorker) {
+        console.log('Background workers started');
+      }
+    } else {
+      console.warn('⚠️  Background workers disabled - Redis not configured');
+    }
 
     // Start server
     app.listen(PORT, () => {

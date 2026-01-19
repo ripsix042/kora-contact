@@ -20,6 +20,11 @@ export const startDeviceSyncWorker = () => {
     }
   });
 
+  if (!worker) {
+    logger.warn('Device sync worker not started - Redis not configured');
+    return null;
+  }
+
   worker.on('completed', (job) => {
     logger.info(`Device sync job ${job.id} completed`);
   });

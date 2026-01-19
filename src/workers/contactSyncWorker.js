@@ -19,6 +19,11 @@ export const startContactSyncWorker = () => {
     }
   });
 
+  if (!worker) {
+    logger.warn('Contact sync worker not started - Redis not configured');
+    return null;
+  }
+
   worker.on('completed', (job) => {
     logger.info(`Contact sync job ${job.id} completed`);
   });
