@@ -6,7 +6,9 @@ const queues = {};
 
 export const connectRedis = async () => {
   // If Redis is not configured, skip connection
-  if (!process.env.REDIS_HOST) {
+  // Also check if it's set to localhost (which won't work on Render)
+  const redisHost = process.env.REDIS_HOST?.trim();
+  if (!redisHost || redisHost === 'localhost' || redisHost === '127.0.0.1') {
     console.warn('⚠️  Redis not configured - background jobs will be disabled');
     console.warn('   Set REDIS_HOST, REDIS_PORT, and REDIS_PASSWORD to enable Redis');
     return null;
@@ -28,13 +30,24 @@ export const connectRedis = async () => {
       password: process.env.REDIS_PASSWORD || undefined,
     });
 
-    redisClient.on('error', (err) => console.error('Redis Client Error', err));
+    // Only log errors if we're actually trying to use Redis
+    redisClient.on('error', (err) => {
+      // Suppress connection refused errors if Redis isn't properly configured
+      if (err.code === 'ECONNREFUSED' && !process.env.REDIS_HOST) {
+        return; // Silently ignore if Redis wasn't configured
+      }
+      console.error('Redis Client Error', err);
+    });
+    
     await redisClient.connect();
     console.log(`Redis Connected to ${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`);
     return redisClient;
   } catch (error) {
-    console.error('Redis connection error:', error);
-    console.warn('⚠️  Continuing without Redis - background jobs will be disabled');
+    // Only log if we actually tried to connect (REDIS_HOST was set)
+    if (process.env.REDIS_HOST) {
+      console.error('Redis connection error:', error.message);
+      console.warn('⚠️  Continuing without Redis - background jobs will be disabled');
+    }
     return null;
   }
 };
@@ -42,9 +55,9 @@ export const connectRedis = async () => {
 export const getRedisClient = () => redisClient;
 
 export const getQueue = (name) => {
-  if (!process.env.REDIS_HOST) {
-    console.warn(`Queue ${name} not available - Redis not configured`);
-    return null;
+  const redisHost = process.env.REDIS_HOST?.trim();
+  if (!redisHost || redisHost === 'localhost' || redisHost === '127.0.0.1') {
+    return null; // Silently return null, don't log warnings for every queue access
   }
   
   if (!queues[name]) {
@@ -60,9 +73,9 @@ export const getQueue = (name) => {
 };
 
 export const createWorker = (name, processor) => {
-  if (!process.env.REDIS_HOST) {
-    console.warn(`Worker ${name} not started - Redis not configured`);
-    return null;
+  const redisHost = process.env.REDIS_HOST?.trim();
+  if (!redisHost || redisHost === 'localhost' || redisHost === '127.0.0.1') {
+    return null; // Silently return null, don't log warnings
   }
   
   return new Worker(

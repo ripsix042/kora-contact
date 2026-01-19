@@ -89,7 +89,8 @@ const startServer = async () => {
     }
 
     // Start background workers (only if Redis is available)
-    if (process.env.REDIS_HOST) {
+    const redisHost = process.env.REDIS_HOST?.trim();
+    if (redisHost && redisHost !== 'localhost' && redisHost !== '127.0.0.1') {
       const contactWorker = startContactSyncWorker();
       const deviceWorker = startDeviceSyncWorker();
       if (contactWorker && deviceWorker) {
