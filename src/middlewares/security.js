@@ -3,12 +3,12 @@ import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 
 // CORS configuration
-// Allow Cloudflare tunnel URLs and configured origin
+// Allow Render URLs and configured origin
 const allowedOrigins = [
   'http://localhost:8080',
   process.env.CORS_ORIGIN,
-  // Allow all Cloudflare tunnel URLs (trycloudflare.com)
-  /^https:\/\/.*\.trycloudflare\.com$/,
+  // Allow all Render URLs (onrender.com)
+  /^https:\/\/.*\.onrender\.com$/,
 ].filter(Boolean);
 
 export const corsMiddleware = cors({

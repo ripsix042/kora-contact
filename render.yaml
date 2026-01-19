@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: kora-contacts-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_HOST
+        sync: false
+      - key: REDIS_PORT
+        sync: false
+      - key: REDIS_PASSWORD
+        sync: false
+      - key: OKTA_ISSUER
+        sync: false
+      - key: OKTA_AUDIENCE
+        sync: false
+      - key: OKTA_CLIENT_ID
+        sync: false
+      - key: ENCRYPTION_KEY
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
