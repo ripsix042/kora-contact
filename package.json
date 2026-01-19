@@ -1,0 +1,44 @@
+{
+  "name": "kora-contacts-hub-backend",
+  "version": "1.0.0",
+  "description": "Kora Contacts Hub Backend with Okta SSO",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "tunnel": "cloudflared tunnel --url http://localhost:3000",
+    "dev:tunnel": "npm run dev & npm run tunnel",
+    "lint": "eslint src/**/*.js",
+    "lint:fix": "eslint src/**/*.js --fix",
+    "format": "prettier --write \"src/**/*.js\"",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+  },
+  "keywords": ["contacts", "okta", "carddav", "mosyle"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@okta/jwt-verifier": "^3.0.1",
+    "express": "^4.18.2",
+    "mongoose": "^8.0.3",
+    "redis": "^4.6.12",
+    "bullmq": "^5.4.0",
+    "dotenv": "^16.3.1",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "express-rate-limit": "^7.1.5",
+    "express-validator": "^7.0.1",
+    "multer": "^1.4.5-lts.1",
+    "csv-parser": "^3.0.0",
+    "bcryptjs": "^2.4.3",
+    "crypto": "^1.0.1",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "jest": "^29.7.0"
+  }
+}
+

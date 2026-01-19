@@ -1,0 +1,408 @@
+{
+  "info": {
+    "name": "Kora Contacts Hub API",
+    "description": "API collection for Kora Contacts Hub Backend with Okta authentication",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{okta_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "okta_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        }
+      }
+    },
+    {
+      "name": "Dashboard",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/dashboard",
+          "host": ["{{base_url}}"],
+          "path": ["api", "dashboard"]
+        }
+      }
+    },
+    {
+      "name": "Contacts",
+      "item": [
+        {
+          "name": "Get All Contacts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/contacts?page=1&limit=50",
+              "host": ["{{base_url}}"],
+              "path": ["api", "contacts"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Contact by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/contacts/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "contacts", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Contact",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@korapay.com\",\n  \"phone\": \"+1234567890\",\n  \"company\": \"Acme Inc\",\n  \"title\": \"Manager\",\n  \"notes\": \"Important contact\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/contacts",
+              "host": ["{{base_url}}"],
+              "path": ["api", "contacts"]
+            }
+          }
+        },
+        {
+          "name": "Update Contact",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe Updated\",\n  \"email\": \"john.doe@korapay.com\",\n  \"phone\": \"+1234567890\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/contacts/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "contacts", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Contact",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/contacts/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "contacts", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Devices",
+      "item": [
+        {
+          "name": "Get All Devices",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/devices?page=1&limit=50",
+              "host": ["{{base_url}}"],
+              "path": ["api", "devices"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "status",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Device by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/devices/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "devices", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Device",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"iPhone 13\",\n  \"serialNumber\": \"ABC123XYZ\",\n  \"model\": \"iPhone 13\",\n  \"osVersion\": \"iOS 17.0\",\n  \"status\": \"available\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/devices",
+              "host": ["{{base_url}}"],
+              "path": ["api", "devices"]
+            }
+          }
+        },
+        {
+          "name": "Update Device",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"iPhone 13 Updated\",\n  \"serialNumber\": \"ABC123XYZ\",\n  \"status\": \"assigned\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/devices/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "devices", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Device",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/devices/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "devices", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Settings (Admin Only)",
+      "item": [
+        {
+          "name": "Get Integration Settings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/settings/integrations",
+              "host": ["{{base_url}}"],
+              "path": ["api", "settings", "integrations"]
+            }
+          }
+        },
+        {
+          "name": "Update CardDAV Settings",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enabled\": true,\n  \"url\": \"https://carddav.example.com\",\n  \"username\": \"user@example.com\",\n  \"password\": \"secret\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/settings/integrations/carddav",
+              "host": ["{{base_url}}"],
+              "path": ["api", "settings", "integrations", "carddav"]
+            }
+          }
+        },
+        {
+          "name": "Update Mosyle Settings",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enabled\": true,\n  \"apiKey\": \"your-api-key\",\n  \"baseUrl\": \"https://businessapi.mosyle.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/settings/integrations/mosyle",
+              "host": ["{{base_url}}"],
+              "path": ["api", "settings", "integrations", "mosyle"]
+            }
+          }
+        },
+        {
+          "name": "Trigger Mosyle Sync",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/settings/integrations/mosyle/sync",
+              "host": ["{{base_url}}"],
+              "path": ["api", "settings", "integrations", "mosyle", "sync"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bulk Upload (Admin Only)",
+      "item": [
+        {
+          "name": "Upload Contacts CSV",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/bulk-upload/contacts",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bulk-upload", "contacts"]
+            }
+          }
+        },
+        {
+          "name": "Upload Devices CSV",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/bulk-upload/devices",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bulk-upload", "devices"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+
