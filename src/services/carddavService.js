@@ -7,20 +7,59 @@ import { AppError } from '../middlewares/errorHandler.js';
  * Generate vCard format for a contact
  */
 const generateVCard = (contact) => {
+  // Get full name - prefer firstName/lastName, fallback to name
+  const fullName = (contact.firstName && contact.lastName)
+    ? `${contact.firstName} ${contact.lastName}`.trim()
+    : (contact.name || '');
+  
+  const lastName = contact.lastName || '';
+  const firstName = contact.firstName || '';
+  
   const lines = [
     'BEGIN:VCARD',
     'VERSION:3.0',
-    `FN:${contact.name}`,
-    `EMAIL:${contact.email}`,
-    `TEL:${contact.phone}`,
+    `FN:${fullName}`,
   ];
+  
+  // Add structured name (N field)
+  if (lastName || firstName) {
+    lines.push(`N:${lastName};${firstName};;;`);
+  } else if (fullName) {
+    // Fallback: try to split name
+    const nameParts = fullName.split(/\s+/);
+    const last = nameParts.length > 1 ? nameParts.slice(-1)[0] : '';
+    const first = nameParts.length > 1 ? nameParts.slice(0, -1).join(' ') : fullName;
+    lines.push(`N:${last};${first};;;`);
+  }
+  
+  lines.push(`EMAIL:${contact.email}`);
+  lines.push(`TEL:${contact.phone}`);
 
-  if (contact.company) {
+  // Organization (prefer department, fallback to company)
+  if (contact.department) {
+    lines.push(`ORG:${contact.department}`);
+  } else if (contact.company) {
     lines.push(`ORG:${contact.company}`);
   }
-  if (contact.title) {
+  
+  // Title (prefer jobRole, fallback to title)
+  if (contact.jobRole) {
+    lines.push(`TITLE:${contact.jobRole}`);
+  } else if (contact.title) {
     lines.push(`TITLE:${contact.title}`);
   }
+  
+  // Department (if different from org)
+  if (contact.department && contact.company && contact.department !== contact.company) {
+    lines.push(`X-DEPARTMENT:${contact.department}`);
+  }
+  
+  // LinkedIn URL
+  if (contact.linkedIn) {
+    lines.push(`URL:${contact.linkedIn}`);
+  }
+  
+  // Notes
   if (contact.notes) {
     lines.push(`NOTE:${contact.notes}`);
   }

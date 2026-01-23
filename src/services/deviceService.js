@@ -71,12 +71,14 @@ export const createDevice = async (deviceData, user) => {
   // Log audit event
   await logAuditEvent('create', 'device', device._id.toString(), deviceData, user);
 
-  // Trigger Mosyle sync
+  // Trigger Mosyle sync (only if Redis is configured)
   const syncQueue = getQueue('device-sync');
-  await syncQueue.add('sync-device', {
-    deviceId: device._id.toString(),
-    action: 'create',
-  });
+  if (syncQueue) {
+    await syncQueue.add('sync-device', {
+      deviceId: device._id.toString(),
+      action: 'create',
+    });
+  }
 
   return device;
 };
@@ -107,12 +109,14 @@ export const updateDevice = async (id, updateData, user) => {
   // Log audit event
   await logAuditEvent('update', 'device', id, updateData, user);
 
-  // Trigger Mosyle sync
+  // Trigger Mosyle sync (only if Redis is configured)
   const syncQueue = getQueue('device-sync');
-  await syncQueue.add('sync-device', {
-    deviceId: id,
-    action: 'update',
-  });
+  if (syncQueue) {
+    await syncQueue.add('sync-device', {
+      deviceId: id,
+      action: 'update',
+    });
+  }
 
   return device;
 };
@@ -128,13 +132,14 @@ export const deleteDevice = async (id, user) => {
   // Log audit event
   await logAuditEvent('delete', 'device', id, { deletedDevice: device }, user);
 
-  // Trigger Mosyle sync
+  // Trigger Mosyle sync (only if Redis is configured)
   const syncQueue = getQueue('device-sync');
-  await syncQueue.add('sync-device', {
-    deviceId: id,
-    action: 'delete',
-  });
+  if (syncQueue) {
+    await syncQueue.add('sync-device', {
+      deviceId: id,
+      action: 'delete',
+    });
+  }
 
   return { message: 'Device deleted successfully' };
 };
-

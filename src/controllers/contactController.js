@@ -50,3 +50,21 @@ export const deleteContact = async (req, res, next) => {
   }
 };
 
+export const getDepartments = async (req, res, next) => {
+  try {
+    const departments = await contactService.getDepartments();
+    res.json(departments);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getJobRoles = async (req, res, next) => {
+  try {
+    const jobRoles = await contactService.getJobRoles();
+    res.json(jobRoles);
+  } catch (error) {
+    next(error);
+  }
+};
+

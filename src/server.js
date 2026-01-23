@@ -15,6 +15,7 @@ import settingsRoutes from './routes/settingsRoutes.js';
 import bulkUploadRoutes from './routes/bulkUploadRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import invitationRoutes from './routes/invitationRoutes.js';
+import dropdownRoutes from './routes/dropdownRoutes.js';
 
 // Workers
 import { startContactSyncWorker } from './workers/contactSyncWorker.js';
@@ -51,6 +52,7 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/bulk-upload', bulkUploadRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/invitations', invitationRoutes);
+app.use('/api/dropdowns', dropdownRoutes);
 
 // Error handling
 app.use(errorHandler);
