@@ -19,6 +19,13 @@ const deviceSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    deviceType: {
+      type: String,
+      trim: true,
+      enum: ['phone', 'laptop'],
+      default: 'laptop',
+      index: true,
+    },
     osVersion: {
       type: String,
       trim: true,
@@ -66,7 +73,7 @@ const deviceSchema = new mongoose.Schema(
 );
 
 // Text search index
-deviceSchema.index({ name: 'text', serialNumber: 'text', model: 'text' });
+deviceSchema.index({ name: 'text', serialNumber: 'text', model: 'text', deviceType: 'text' });
 
 export const Device = mongoose.model('Device', deviceSchema);
 

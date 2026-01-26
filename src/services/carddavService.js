@@ -42,10 +42,8 @@ const generateVCard = (contact) => {
     lines.push(`ORG:${contact.company}`);
   }
   
-  // Title (prefer jobRole, fallback to title)
-  if (contact.jobRole) {
-    lines.push(`TITLE:${contact.jobRole}`);
-  } else if (contact.title) {
+  // Title
+  if (contact.title) {
     lines.push(`TITLE:${contact.title}`);
   }
   

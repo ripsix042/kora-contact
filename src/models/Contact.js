@@ -57,11 +57,6 @@ const contactSchema = new mongoose.Schema(
       maxlength: 100,
       index: true,
     },
-    jobRole: {
-      type: String,
-      trim: true,
-      maxlength: 100,
-    },
     // Legacy fields (for backward compatibility)
     company: {
       type: String,
@@ -122,9 +117,6 @@ contactSchema.pre('save', function (next) {
   // Map legacy fields to new fields if needed
   if (this.company && !this.department) {
     this.department = this.company;
-  }
-  if (this.title && !this.jobRole) {
-    this.jobRole = this.title;
   }
   next();
 });

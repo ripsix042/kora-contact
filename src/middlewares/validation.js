@@ -66,11 +66,6 @@ export const validateContact = [
     .trim()
     .isLength({ max: 100 })
     .withMessage('Department must be less than 100 characters'),
-  body('jobRole')
-    .optional()
-    .trim()
-    .isLength({ max: 100 })
-    .withMessage('Job role must be less than 100 characters'),
   body('profileImage')
     .optional()
     .trim()
@@ -94,6 +89,11 @@ export const validateDevice = [
   body('name').trim().notEmpty().withMessage('Name is required'),
   body('serialNumber').trim().notEmpty().withMessage('Serial number is required'),
   body('model').optional().trim(),
+  body('deviceType')
+    .optional()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage('Device type must be less than 100 characters'),
   body('osVersion').optional().trim(),
   body('status')
     .optional()

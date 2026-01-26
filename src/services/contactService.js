@@ -71,8 +71,6 @@ const DEPARTMENTS = [
   'Treasury Product Management',
 ];
 
-const ROLE_TYPES = ['Executive', 'Manager', 'Analyst', 'Intern'];
-
 let defaultsSeeded = false;
 
 const ensureDefaultDropdowns = async () => {
@@ -82,13 +80,6 @@ const ensureDefaultDropdowns = async () => {
       updateOne: {
         filter: { type: 'department', value },
         update: { $setOnInsert: { type: 'department', value, isActive: true } },
-        upsert: true,
-      },
-    })),
-    ...ROLE_TYPES.map((value) => ({
-      updateOne: {
-        filter: { type: 'role', value },
-        update: { $setOnInsert: { type: 'role', value, isActive: true } },
         upsert: true,
       },
     })),
@@ -130,11 +121,6 @@ export const createContact = async (contactData, user) => {
     if (nameParts.length > 1 && !normalizedData.lastName) {
       normalizedData.lastName = nameParts.slice(1).join(' ');
     }
-  }
-  
-  // Map jobRole to title if title not provided (backward compatibility)
-  if (normalizedData.jobRole && !normalizedData.title) {
-    normalizedData.title = normalizedData.jobRole;
   }
   
   // Map department to company if company not provided (backward compatibility)
@@ -202,11 +188,6 @@ export const updateContact = async (id, updateData, user) => {
     if (nameParts.length > 1) {
       normalizedData.lastName = nameParts.slice(1).join(' ');
     }
-  }
-  
-  // Map jobRole to title if title not provided (backward compatibility)
-  if (normalizedData.jobRole && !normalizedData.title) {
-    normalizedData.title = normalizedData.jobRole;
   }
   
   // Map department to company if company not provided (backward compatibility)
@@ -293,17 +274,5 @@ export const getDepartments = async () => {
     { value: 1, _id: 0 }
   ).sort({ value: 1 });
   return departments.map((d) => d.value);
-};
-
-/**
- * Get unique list of job roles
- */
-export const getJobRoles = async () => {
-  await ensureDefaultDropdowns();
-  const roles = await DropdownOption.find(
-    { type: 'role', isActive: true },
-    { value: 1, _id: 0 }
-  ).sort({ value: 1 });
-  return roles.map((r) => r.value);
 };
 

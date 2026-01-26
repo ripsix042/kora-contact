@@ -10,7 +10,6 @@ router.use(verifyOktaToken);
 
 router.get('/', validatePagination, contactController.getAllContacts);
 router.get('/departments', contactController.getDepartments);
-router.get('/job-roles', contactController.getJobRoles);
 router.get('/:id', validateId, contactController.getContactById);
 router.post('/', validateContact, contactController.createContact);
 router.put('/:id', validateId, validateContact, contactController.updateContact);

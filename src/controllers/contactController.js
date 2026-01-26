@@ -58,13 +58,3 @@ export const getDepartments = async (req, res, next) => {
     next(error);
   }
 };
-
-export const getJobRoles = async (req, res, next) => {
-  try {
-    const jobRoles = await contactService.getJobRoles();
-    res.json(jobRoles);
-  } catch (error) {
-    next(error);
-  }
-};
-
