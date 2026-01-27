@@ -8,7 +8,6 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
       unique: true,
-      index: true,
     },
     role: {
       type: String,
@@ -25,9 +24,4 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Index for email lookups
-userSchema.index({ email: 1 });
-
 export const User = mongoose.model('User', userSchema);
-
-
