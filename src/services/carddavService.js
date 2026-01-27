@@ -4,6 +4,33 @@ import { SyncLog } from '../models/SyncLog.js';
 import { AppError } from '../middlewares/errorHandler.js';
 
 /**
+ * Normalize password by removing spaces (for Google App Passwords)
+ */
+const normalizePassword = (password) => {
+  if (!password) return password;
+  // Remove all spaces (Google App Passwords are displayed with spaces but used without)
+  return password.replace(/\s+/g, '');
+};
+
+/**
+ * Check if URL is Google CardDAV and convert discovery URL to actual endpoint
+ */
+const normalizeGoogleCardDAVUrl = (url, username) => {
+  if (url && url.includes('googleapis.com')) {
+    // If it's the discovery URL, convert to actual endpoint
+    if (url.includes('/.well-known/carddav')) {
+      // Google CardDAV endpoint format
+      return `https://www.googleapis.com/carddav/v1/principals/${encodeURIComponent(username)}/lists/default/`;
+    }
+    // If already the endpoint format, ensure it ends with /
+    if (!url.endsWith('/')) {
+      return url + '/';
+    }
+  }
+  return url;
+};
+
+/**
  * Generate vCard format for a contact
  */
 const generateVCard = (contact) => {
@@ -82,17 +109,23 @@ export const syncContactToCardDAV = async (contactId, action) => {
   }
 
   const config = settings.getDecryptedConfig();
-  const url = config.url;
+  let url = config.url;
   const username = config.username;
-  const password = config.password;
+  let password = config.password;
 
   if (!url || !username || !password) {
     throw new AppError('CardDAV credentials not configured', 400);
   }
 
+  // Normalize password (remove spaces for App Passwords)
+  password = normalizePassword(password);
+
+  // Normalize Google CardDAV URL
+  url = normalizeGoogleCardDAVUrl(url, username);
+
   try {
     const vcard = generateVCard(contact);
-    const contactUrl = `${url}/${contact._id}.vcf`;
+    const contactUrl = `${url}${contact._id}.vcf`;
 
     if (action === 'delete') {
       // DELETE request
@@ -143,13 +176,19 @@ export const syncAllContactsToCardDAV = async () => {
   }
 
   const config = settings.getDecryptedConfig();
-  const url = config.url;
+  let url = config.url;
   const username = config.username;
-  const password = config.password;
+  let password = config.password;
 
   if (!url || !username || !password) {
     throw new AppError('CardDAV credentials not configured', 400);
   }
+
+  // Normalize password (remove spaces for App Passwords)
+  password = normalizePassword(password);
+
+  // Normalize Google CardDAV URL
+  url = normalizeGoogleCardDAVUrl(url, username);
 
   // Create sync log
   const syncLog = await SyncLog.create({
@@ -170,7 +209,7 @@ export const syncAllContactsToCardDAV = async () => {
       processed++;
       try {
         const vcard = generateVCard(contact);
-        const contactUrl = `${url}/${contact._id}.vcf`;
+        const contactUrl = `${url}${contact._id}.vcf`;
 
         const response = await fetch(contactUrl, {
           method: 'PUT',
@@ -235,30 +274,57 @@ export const testCardDAVConnection = async () => {
   }
 
   const config = settings.getDecryptedConfig();
-  const url = config.url;
+  let url = config.url;
   const username = config.username;
-  const password = config.password;
+  let password = config.password;
 
   if (!url || !username || !password) {
     throw new AppError('CardDAV credentials not configured', 400);
   }
 
+  // Normalize password (remove spaces for App Passwords)
+  password = normalizePassword(password);
+
+  // Normalize Google CardDAV URL
+  const isGoogle = url.includes('googleapis.com');
+  url = normalizeGoogleCardDAVUrl(url, username);
+
   try {
+    // PROPFIND XML body for CardDAV
+    const propfindXml = `<?xml version="1.0" encoding="UTF-8"?>
+<d:propfind xmlns:d="DAV:" xmlns:card="urn:ietf:params:xml:ns:carddav">
+  <d:prop>
+    <d:resourcetype/>
+    <d:displayname/>
+  </d:prop>
+</d:propfind>`;
+
     // Try to make a PROPFIND request to test connection
     const response = await fetch(url, {
       method: 'PROPFIND',
       headers: {
         'Depth': '0',
+        'Content-Type': 'application/xml',
         'Authorization': `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
       },
+      body: propfindXml,
     });
 
     if (response.status === 401 || response.status === 403) {
-      throw new Error('Authentication failed');
+      let errorMessage = 'Authentication failed';
+      if (isGoogle) {
+        errorMessage += '. For Google CardDAV, you must use an App Password, not your regular Google password. Generate one at: https://myaccount.google.com/apppasswords';
+      }
+      throw new Error(errorMessage);
     }
 
     if (!response.ok && response.status !== 207) {
-      throw new Error(`Connection failed: ${response.status} ${response.statusText}`);
+      const responseText = await response.text().catch(() => '');
+      let errorMessage = `Connection failed: ${response.status} ${response.statusText}`;
+      if (responseText) {
+        errorMessage += `. ${responseText.substring(0, 200)}`;
+      }
+      throw new Error(errorMessage);
     }
 
     return { success: true, message: 'Connection successful' };

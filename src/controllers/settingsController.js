@@ -30,14 +30,19 @@ export const updateCardDAVSettings = async (req, res, next) => {
     }
 
     settings.enabled = enabled !== undefined ? enabled : settings.enabled;
+    
+    // Build config object, excluding password (it's stored encrypted separately)
+    const { password: _, ...configWithoutPassword } = settings.config || {};
     settings.config = {
-      ...settings.config,
-      url: url || settings.config.url,
-      username: username || settings.config.username,
+      ...configWithoutPassword,
+      url: url || settings.config?.url,
+      username: username || settings.config?.username,
     };
 
     if (password) {
       settings.setEncryptedField('password', password);
+      // Ensure password is removed from config if it exists
+      delete settings.config.password;
     }
 
     await settings.save();
@@ -73,13 +78,18 @@ export const updateMosyleSettings = async (req, res, next) => {
     }
 
     settings.enabled = enabled !== undefined ? enabled : settings.enabled;
+    
+    // Build config object, excluding apiKey (it's stored encrypted separately)
+    const { apiKey: _, ...configWithoutApiKey } = settings.config || {};
     settings.config = {
-      ...settings.config,
-      baseUrl: baseUrl || settings.config.baseUrl || 'https://businessapi.mosyle.com',
+      ...configWithoutApiKey,
+      baseUrl: baseUrl || settings.config?.baseUrl || 'https://businessapi.mosyle.com',
     };
 
     if (apiKey) {
       settings.setEncryptedField('apiKey', apiKey);
+      // Ensure apiKey is removed from config if it exists
+      delete settings.config.apiKey;
     }
 
     await settings.save();
@@ -173,4 +183,3 @@ export const getLastSyncStatus = async (req, res, next) => {
     next(error);
   }
 };
-
