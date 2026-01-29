@@ -1,23 +1,21 @@
 # Dependencies
-node_modules
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-package-lock.json
-yarn.lock
+node_modules/
+jspm_packages/
 
-# Environment variables
+# Lock files (uncomment to ignore; many teams commit package-lock.json)
+# package-lock.json
+# yarn.lock
+
+# Environment and secrets (do not commit)
 .env
-.env.local
-.env.development
-.env.staging
-.env.production
-.env.test
-.env.production.example
-.env.example
+.env.*
+!.env.example
+
 # Logs
 logs/
 *.log
+combined.log
+error.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -34,10 +32,6 @@ pids/
 coverage/
 *.lcov
 .nyc_output/
-
-# Dependency directories
-node_modules/
-jspm_packages/
 
 # Optional npm cache directory
 .npm
@@ -108,7 +102,11 @@ dist/
 test-results/
 playwright-report/
 
-# Temporary files
+# Temporary and upload files
 tmp/
 temp/
+uploads/
+
+# Cursor / local IDE (optional)
+# .cursor/
 
