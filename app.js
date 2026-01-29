@@ -1,6 +1,3 @@
-// Note: Environment variables are loaded in server.js first
-// This prevents double-loading and ensures correct file is used
-
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -10,14 +7,9 @@ const rateLimit = require('express-rate-limit');
 
 const app = express();
 
-// ============================================
-// MIDDLEWARE
-// ============================================
-
-// Security middleware
+// Middleware
 app.use(helmet());
 
-// CORS configuration
 const corsOptions = {
   origin: process.env.CORS_ORIGIN?.split(','),
   credentials: true,
@@ -25,45 +17,29 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// Compression middleware
 app.use(compression());
+app.use(process.env.NODE_ENV === 'production' ? morgan('combined') : morgan('dev'));
 
-// Logging middleware
-if (process.env.NODE_ENV !== 'production') {
-  app.use(morgan('dev'));
-} else {
-  app.use(morgan('combined'));
-}
-
-// Rate limiting
 const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 60000, // 1 minute
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // 100 requests per window
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS, 10) || 60000,
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS, 10) || 100,
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
 });
-
 const authLimiter = rateLimit({
-  windowMs: 60000, // 1 minute
-  max: parseInt(process.env.RATE_LIMIT_AUTH_MAX_REQUESTS) || 10, // 10 requests per window
+  windowMs: 60000,
+  max: parseInt(process.env.RATE_LIMIT_AUTH_MAX_REQUESTS, 10) || 10,
   message: 'Too many authentication attempts, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
 });
-
 app.use('/api', limiter);
 app.use('/api/auth', authLimiter);
 
-// ============================================
-// ROUTES
-// ============================================
-
-// Health check endpoint
+// Routes
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'OK',
@@ -73,7 +49,6 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API routes (to be implemented)
 app.get('/api', (req, res) => {
   res.json({
     message: 'Kora Contacts Hub API',
@@ -90,19 +65,7 @@ app.get('/api', (req, res) => {
   });
 });
 
-// TODO: Add route handlers
-// app.use('/api/auth', require('./routes/auth'));
-// app.use('/api/contacts', require('./routes/contacts'));
-// app.use('/api/devices', require('./routes/devices'));
-// app.use('/api/users', require('./routes/users'));
-// app.use('/api/dashboard', require('./routes/dashboard'));
-// app.use('/api/settings', require('./routes/settings'));
-
-// ============================================
-// ERROR HANDLING
-// ============================================
-
-// 404 handler
+// Error handling
 app.use((req, res) => {
   res.status(404).json({
     error: 'Not Found',
@@ -110,13 +73,10 @@ app.use((req, res) => {
   });
 });
 
-// Global error handler
-app.use((err, req, res, next) => {
+app.use((err, req, res, _next) => {
   console.error('Error:', err);
-
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
-
   res.status(statusCode).json({
     error: message,
     code: err.code || 'INTERNAL_ERROR',
