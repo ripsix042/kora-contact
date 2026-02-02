@@ -32,14 +32,20 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(compression());
 app.use(requestLogger);
 
-app.get('/health', (req, res) => {
+const healthResponse = (req, res) => {
   res.status(200).json({
     status: 'OK',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
     uptime: process.uptime(),
   });
+};
+
+app.get('/', (req, res) => {
+  res.redirect(302, '/health');
 });
+
+app.get(['/health', '/health.'], healthResponse);
 
 app.get('/api', (req, res) => {
   res.json({
