@@ -129,7 +129,17 @@ export const verifyOktaToken = async (req, res, next) => {
           }
         }
       } catch (_) {}
-      console.error('Token verification failed:', error.message, hint, error.stack);
+      const serverIssuer = process.env.OKTA_ISSUER?.trim() || '(not set)';
+      const serverJwks = process.env.OKTA_JWKS_URI?.trim() ? 'set' : '(not set)';
+      console.error(
+        'Token verification failed:',
+        error.message,
+        hint,
+        '| Server OKTA_ISSUER:',
+        serverIssuer,
+        '| OKTA_JWKS_URI:',
+        serverJwks
+      );
       return res.status(401).json({
         error: 'Unauthorized',
         message: 'Invalid or expired token',
