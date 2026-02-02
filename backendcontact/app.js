@@ -20,8 +20,8 @@ import dropdownRoutes from './routes/dropdownRoutes.js';
 
 const app = express();
 
-// Trust first proxy (e.g. Render) so req.protocol and req.host are correct for redirect URIs
-app.set('trust proxy', 1);
+// Trust proxy when behind Render/load balancer (needed for X-Forwarded-For and redirect URIs)
+app.set('trust proxy', true);
 
 app.use(helmetMiddleware);
 app.use(corsMiddleware);

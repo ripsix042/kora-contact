@@ -6,8 +6,7 @@ import rateLimit from 'express-rate-limit';
 const corsOriginList = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim()).filter(Boolean)
   : [];
-const allowedOrigins = [
-  'http://localhost:5173', // Vite frontend dev
+const allowedOrigins = [ // Vite frontend dev
   'http://localhost:8080',
   'https://kora-contact-staging.vercel.app', // Frontend staging
   ...corsOriginList,
@@ -56,13 +55,14 @@ export const helmetMiddleware = helmet({
   },
 });
 
-// Rate limiting
+// Rate limiting (validate.trustProxy: false avoids ERR_ERL_UNEXPECTED_X_FORWARDED_FOR when behind a proxy; app must set trust proxy)
 export const rateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { trustProxy: false },
 });
 
 // Stricter rate limit for auth endpoints
