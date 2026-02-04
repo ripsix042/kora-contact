@@ -23,6 +23,16 @@ export const getContactById = async (req, res, next) => {
   }
 };
 
+/** Public (no auth): get contact by ID for QR/share links */
+export const getPublicContactById = async (req, res, next) => {
+  try {
+    const contact = await contactService.getContactById(req.params.id);
+    res.json(contact);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const createContact = async (req, res, next) => {
   try {
     const contact = await contactService.createContact(req.body, req.user);

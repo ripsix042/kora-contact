@@ -1,9 +1,21 @@
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
-const compression = require('compression');
-const rateLimit = require('express-rate-limit');
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import compression from 'compression';
+import rateLimit from 'express-rate-limit';
+
+// API routes from src (dashboard, contacts, devices, etc.)
+import contactRoutes from './src/routes/contactRoutes.js';
+import deviceRoutes from './src/routes/deviceRoutes.js';
+import dashboardRoutes from './src/routes/dashboardRoutes.js';
+import settingsRoutes from './src/routes/settingsRoutes.js';
+import bulkUploadRoutes from './src/routes/bulkUploadRoutes.js';
+import userRoutes from './src/routes/userRoutes.js';
+import invitationRoutes from './src/routes/invitationRoutes.js';
+import dropdownRoutes from './src/routes/dropdownRoutes.js';
+import publicRoutes from './src/routes/publicRoutes.js';
+import { errorHandler } from './src/middlewares/errorHandler.js';
 
 const app = express();
 
@@ -11,7 +23,7 @@ const app = express();
 app.use(helmet());
 
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN?.split(','),
+  origin: process.env.CORS_ORIGIN?.split(',') || true,
   credentials: true,
   optionsSuccessStatus: 200,
 };
@@ -65,7 +77,21 @@ app.get('/api', (req, res) => {
   });
 });
 
-// Error handling
+// Mount full API from src
+app.use('/api/contacts', contactRoutes);
+app.use('/api/devices', deviceRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/bulk-upload', bulkUploadRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/invitations', invitationRoutes);
+app.use('/api/dropdowns', dropdownRoutes);
+app.use('/api/public', publicRoutes);
+
+// Error handling (use src errorHandler so AppError statusCode is respected)
+app.use(errorHandler);
+
+// 404 handler
 app.use((req, res) => {
   res.status(404).json({
     error: 'Not Found',
@@ -73,6 +99,7 @@ app.use((req, res) => {
   });
 });
 
+// Fallback error handler
 app.use((err, req, res, _next) => {
   console.error('Error:', err);
   const statusCode = err.statusCode || 500;
@@ -85,5 +112,4 @@ app.use((err, req, res, _next) => {
   });
 });
 
-module.exports = app;
-
+export default app;
