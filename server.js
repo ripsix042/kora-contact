@@ -1,9 +1,10 @@
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config({ path: '.env' });
-}
+import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+import app from './app.js';
 
-const app = require('./app');
-const mongoose = require('mongoose');
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config({ path: '.env' });
+}
 
 const PORT = process.env.PORT || 8085;
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -34,4 +35,3 @@ process.on('SIGINT', async () => {
 app.listen(PORT, () => {
   console.log(`Server on port ${PORT} (${process.env.NODE_ENV || 'development'})`);
 });
-
