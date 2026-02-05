@@ -1,3 +1,4 @@
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -5,7 +6,7 @@ import morgan from 'morgan';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 
-// API routes from src (dashboard, contacts, devices, etc.)
+//API routes from src (dashboard, contacts, devices, etc.)
 import contactRoutes from './src/routes/contactRoutes.js';
 import deviceRoutes from './src/routes/deviceRoutes.js';
 import dashboardRoutes from './src/routes/dashboardRoutes.js';
@@ -16,6 +17,14 @@ import invitationRoutes from './src/routes/invitationRoutes.js';
 import dropdownRoutes from './src/routes/dropdownRoutes.js';
 import publicRoutes from './src/routes/publicRoutes.js';
 import { errorHandler } from './src/middlewares/errorHandler.js';
+
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const morgan = require('morgan');
+const compression = require('compression');
+const rateLimit = require('express-rate-limit');
+
 
 const app = express();
 
