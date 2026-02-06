@@ -16,15 +16,8 @@ import userRoutes from './src/routes/userRoutes.js';
 import invitationRoutes from './src/routes/invitationRoutes.js';
 import dropdownRoutes from './src/routes/dropdownRoutes.js';
 import publicRoutes from './src/routes/publicRoutes.js';
+import scanRoutes from './src/routes/scanRoutes.js';
 import { errorHandler } from './src/middlewares/errorHandler.js';
-
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
-const compression = require('compression');
-const rateLimit = require('express-rate-limit');
-
 
 const app = express();
 
@@ -99,6 +92,7 @@ app.use('/api/bulk-upload', bulkUploadRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/invitations', invitationRoutes);
 app.use('/api/dropdowns', dropdownRoutes);
+app.use('/api/scans', scanRoutes);
 
 // Error handling (use src errorHandler so AppError statusCode is respected)
 app.use(errorHandler);
