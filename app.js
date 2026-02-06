@@ -77,6 +77,7 @@ app.get('/api', (req, res) => {
     endpoints: {
       health: '/health',
       auth: '/api/auth',
+      public: '/api/public',
       contacts: '/api/contacts',
       devices: '/api/devices',
       users: '/api/users',
@@ -86,7 +87,10 @@ app.get('/api', (req, res) => {
   });
 });
 
-// Mount full API from src
+// Mount PUBLIC routes first (no auth - for QR code / share links)
+app.use('/api/public', publicRoutes);
+
+// Mount protected API routes
 app.use('/api/contacts', contactRoutes);
 app.use('/api/devices', deviceRoutes);
 app.use('/api/dashboard', dashboardRoutes);
@@ -95,7 +99,6 @@ app.use('/api/bulk-upload', bulkUploadRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/invitations', invitationRoutes);
 app.use('/api/dropdowns', dropdownRoutes);
-app.use('/api/public', publicRoutes);
 
 // Error handling (use src errorHandler so AppError statusCode is respected)
 app.use(errorHandler);
