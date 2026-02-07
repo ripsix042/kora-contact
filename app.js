@@ -16,14 +16,8 @@ import userRoutes from './src/routes/userRoutes.js';
 import invitationRoutes from './src/routes/invitationRoutes.js';
 import dropdownRoutes from './src/routes/dropdownRoutes.js';
 import publicRoutes from './src/routes/publicRoutes.js';
+import scanRoutes from './src/routes/scanRoutes.js';
 import { errorHandler } from './src/middlewares/errorHandler.js';
-
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
-const compression = require('compression');
-const rateLimit = require('express-rate-limit');
 
 
 const app = express();
@@ -77,6 +71,7 @@ app.get('/api', (req, res) => {
     endpoints: {
       health: '/health',
       auth: '/api/auth',
+      public: '/api/public',
       contacts: '/api/contacts',
       devices: '/api/devices',
       users: '/api/users',
@@ -86,7 +81,10 @@ app.get('/api', (req, res) => {
   });
 });
 
-// Mount full API from src
+// Mount PUBLIC routes first (no auth - for QR code / share links)
+app.use('/api/public', publicRoutes);
+
+// Mount protected API routes
 app.use('/api/contacts', contactRoutes);
 app.use('/api/devices', deviceRoutes);
 app.use('/api/dashboard', dashboardRoutes);
@@ -95,7 +93,7 @@ app.use('/api/bulk-upload', bulkUploadRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/invitations', invitationRoutes);
 app.use('/api/dropdowns', dropdownRoutes);
-app.use('/api/public', publicRoutes);
+app.use('/api/scans', scanRoutes);
 
 // Error handling (use src errorHandler so AppError statusCode is respected)
 app.use(errorHandler);

@@ -1,4 +1,5 @@
 import * as contactService from '../services/contactService.js';
+import * as scanService from '../services/scanService.js';
 import { AppError } from '../middlewares/errorHandler.js';
 
 export const getAllContacts = async (req, res, next) => {
@@ -27,6 +28,7 @@ export const getContactById = async (req, res, next) => {
 export const getPublicContactById = async (req, res, next) => {
   try {
     const contact = await contactService.getContactById(req.params.id);
+    scanService.logContactScan(req.params.id, req);
     res.json(contact);
   } catch (error) {
     next(error);
@@ -64,6 +66,19 @@ export const getDepartments = async (req, res, next) => {
   try {
     const departments = await contactService.getDepartments();
     res.json(departments);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/** Get QR scan history for a contact (auth required) */
+export const getContactScans = async (req, res, next) => {
+  try {
+    const result = await scanService.getContactScans(req.params.id, {
+      page: req.query.page ? parseInt(req.query.page, 10) : 1,
+      limit: req.query.limit ? parseInt(req.query.limit, 10) : 50,
+    });
+    res.json(result);
   } catch (error) {
     next(error);
   }
