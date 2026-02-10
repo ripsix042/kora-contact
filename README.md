@@ -44,6 +44,7 @@ Server will run on `http://localhost:8085`
 - Copy `.env.example` to `.env`
 - Update `MONGODB_URI` with staging database connection string
 - Generate JWT secrets
+- Optional: set `SHARE_LINK_TTL_MINUTES` for single-use share links (default 2 minutes)
 
 ### Production
 - See `.env.production.example` for production configuration

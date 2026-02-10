@@ -1,5 +1,6 @@
 import * as contactService from '../services/contactService.js';
 import * as scanService from '../services/scanService.js';
+import * as shareLinkService from '../services/shareLinkService.js';
 import { AppError } from '../middlewares/errorHandler.js';
 
 export const getAllContacts = async (req, res, next) => {
@@ -24,9 +25,31 @@ export const getContactById = async (req, res, next) => {
   }
 };
 
+/** Create a single-use share link token (auth required) */
+export const createShareLink = async (req, res, next) => {
+  try {
+    const contactId = req.params.id;
+    await contactService.getContactById(contactId);
+    const createdBy = req.user?.email || req.user?.oktaSub || 'unknown';
+    const ttlSeconds = req.body?.ttlSeconds;
+    const maxUses = req.body?.maxUses;
+    const result = await shareLinkService.createShareLink({
+      contactId,
+      createdBy,
+      ttlSeconds,
+      maxUses,
+    });
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 /** Public (no auth): get contact by ID for QR/share links */
 export const getPublicContactById = async (req, res, next) => {
   try {
+    const token = req.query?.token;
+    await shareLinkService.consumeShareLink({ contactId: req.params.id, token });
     const contact = await contactService.getContactById(req.params.id);
     scanService.logContactScan(req.params.id, req);
     res.json(contact);

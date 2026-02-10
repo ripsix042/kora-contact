@@ -11,6 +11,7 @@ router.use(verifyOktaToken);
 router.get('/', validatePagination, contactController.getAllContacts);
 router.get('/departments', contactController.getDepartments);
 router.get('/:id/scans', validateId, contactController.getContactScans);
+router.post('/:id/share-link', validateId, contactController.createShareLink);
 router.get('/:id', validateId, contactController.getContactById);
 router.post('/', validateContact, contactController.createContact);
 router.put('/:id', validateId, validateContact, contactController.updateContact);
