@@ -18,14 +18,15 @@ export const createShareLink = async ({ contactId, createdBy, ttlSeconds, maxUse
   const token = crypto.randomBytes(32).toString('base64url');
   const tokenHash = hashToken(token);
   const defaultTtlSeconds = DEFAULT_TTL_MINUTES() * 60;
-  const resolvedTtl = ttlSeconds ?? defaultTtlSeconds;
-  const ttl = Number.isFinite(resolvedTtl) ? parseInt(resolvedTtl, 10) : defaultTtlSeconds;
+  const isNoExpiry = ttlSeconds === null;
+  const resolvedTtl = isNoExpiry ? null : (ttlSeconds ?? defaultTtlSeconds);
+  const ttl = resolvedTtl === null ? null : (Number.isFinite(resolvedTtl) ? parseInt(resolvedTtl, 10) : defaultTtlSeconds);
 
-  if (ttl < MIN_TTL_SECONDS || ttl > MAX_TTL_SECONDS) {
+  if (ttl !== null && (ttl < MIN_TTL_SECONDS || ttl > MAX_TTL_SECONDS)) {
     throw new AppError(`TTL must be between ${MIN_TTL_SECONDS}s and ${MAX_TTL_SECONDS}s`, 400);
   }
 
-  const expiresAt = new Date(Date.now() + ttl * 1000);
+  const expiresAt = ttl === null ? null : new Date(Date.now() + ttl * 1000);
 
   let resolvedMaxUses = 1;
   if (maxUses === null) {
@@ -61,8 +62,10 @@ export const consumeShareLink = async ({ contactId, token }) => {
     {
       contactId,
       tokenHash,
-      expiresAt: { $gt: now },
-      $or: [{ maxUses: null }, { $expr: { $lt: ['$usesCount', '$maxUses'] } }],
+      $and: [
+        { $or: [{ expiresAt: null }, { expiresAt: { $gt: now } }] },
+        { $or: [{ maxUses: null }, { $expr: { $lt: ['$usesCount', '$maxUses'] } }] },
+      ],
     },
     { $inc: { usesCount: 1 }, $set: { usedAt: now } },
     { new: true }
