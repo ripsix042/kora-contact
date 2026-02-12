@@ -19,6 +19,7 @@ import publicRoutes from './src/routes/publicRoutes.js';
 import scanRoutes from './src/routes/scanRoutes.js';
 import { errorHandler } from './src/middlewares/errorHandler.js';
 
+
 const app = express();
 
 // Middleware
