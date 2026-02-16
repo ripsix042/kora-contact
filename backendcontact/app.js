@@ -17,6 +17,7 @@ import bulkUploadRoutes from './routes/bulkUploadRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import invitationRoutes from './routes/invitationRoutes.js';
 import dropdownRoutes from './routes/dropdownRoutes.js';
+import scanRoutes from './routes/scanRoutes.js';
 
 const app = express();
 
@@ -65,6 +66,7 @@ app.get('/api', (req, res) => {
       'bulk-upload': '/api/v1/bulk-upload',
       invitations: '/api/v1/invitations',
       dropdowns: '/api/v1/dropdowns',
+      scans: '/api/v1/scans',
     },
   });
 });
@@ -84,6 +86,7 @@ app.get('/api/v1', (req, res) => {
       'bulk-upload': '/api/v1/bulk-upload',
       invitations: '/api/v1/invitations',
       dropdowns: '/api/v1/dropdowns',
+      scans: '/api/v1/scans',
     },
   });
 });
@@ -100,6 +103,7 @@ app.use('/api/v1/bulk-upload', bulkUploadRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/invitations', invitationRoutes);
 app.use('/api/v1/dropdowns', dropdownRoutes);
+app.use('/api/v1/scans', scanRoutes);
 
 app.use((req, res) => {
   res.status(404).json({
