@@ -13,6 +13,8 @@ const getRedirectUri = (req) => {
   return `${protocol}://${host}/api/v1/auth/okta/callback`;
 };
 
+const getFrontendUrl = () => process.env.FRONTEND_URL?.trim() || null;
+
 // Okta issuer may be .../oauth2/default or .../oauth2/v1; we always append /v1/authorize and /v1/token
 const getOktaBase = (issuer) =>
   issuer.replace(/\/$/, '').replace(/\/v1$/, '');
@@ -61,9 +63,12 @@ router.get('/okta/callback', async (req, res) => {
   const { code, state, error: oktaError, error_description: oktaErrorDesc } = req.query;
 
   if (oktaError) {
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const frontendUrl = getFrontendUrl();
+    if (!frontendUrl) {
+      return res.status(503).json({ error: 'FRONTEND_URL not configured', message: 'Set FRONTEND_URL for redirects.' });
+    }
     const errorMsg = oktaErrorDesc || oktaError;
-    return res.redirect(`${frontendUrl}/callback?error=${encodeURIComponent(errorMsg)}`);
+    return res.redirect(`${frontendUrl.replace(/\/$/, '')}/callback?error=${encodeURIComponent(errorMsg)}`);
   }
 
   if (!code) {
@@ -103,13 +108,20 @@ router.get('/okta/callback', async (req, res) => {
 
     if (tokenRes.status !== 200) {
       const errMsg = tokenRes.data?.error_description || tokenRes.data?.error || 'Token exchange failed';
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-      return res.redirect(`${frontendUrl}/callback?error=${encodeURIComponent(errMsg)}`);
+      const frontendUrl = getFrontendUrl();
+      if (!frontendUrl) {
+        return res.status(503).json({ error: 'FRONTEND_URL not configured', message: 'Set FRONTEND_URL for redirects.' });
+      }
+      return res.redirect(`${frontendUrl.replace(/\/$/, '')}/callback?error=${encodeURIComponent(errMsg)}`);
     }
 
+    const frontendUrl = getFrontendUrl();
+    if (!frontendUrl) {
+      return res.status(503).json({ error: 'FRONTEND_URL not configured', message: 'Set FRONTEND_URL for redirects.' });
+    }
     const { access_token, refresh_token, id_token, expires_in } = tokenRes.data;
-    const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '');
-    const redirectTo = new URL(`${frontendUrl}/callback`);
+    const baseUrl = frontendUrl.replace(/\/$/, '');
+    const redirectTo = new URL(`${baseUrl}/callback`);
     redirectTo.searchParams.set('access_token', access_token);
     if (expires_in) redirectTo.searchParams.set('expires_in', expires_in);
     if (refresh_token) redirectTo.searchParams.set('refresh_token', refresh_token);
@@ -119,9 +131,12 @@ router.get('/okta/callback', async (req, res) => {
     res.redirect(redirectTo.toString());
   } catch (err) {
     console.error('Okta callback token exchange error:', err.message);
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const frontendUrl = getFrontendUrl();
+    if (!frontendUrl) {
+      return res.status(503).json({ error: 'FRONTEND_URL not configured', message: 'Set FRONTEND_URL for redirects.' });
+    }
     res.redirect(
-      `${frontendUrl}/callback?error=${encodeURIComponent(err.response?.data?.error_description || err.message || 'Token exchange failed')}`
+      `${frontendUrl.replace(/\/$/, '')}/callback?error=${encodeURIComponent(err.response?.data?.error_description || err.message || 'Token exchange failed')}`
     );
   }
 });
