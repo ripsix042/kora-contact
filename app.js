@@ -52,7 +52,9 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 app.use('/api', limiter);
+app.use('/api/v1', limiter);
 app.use('/api/auth', authLimiter);
+app.use('/api/v1/auth', authLimiter);
 
 // Routes
 app.get('/health', (req, res) => {
@@ -71,29 +73,59 @@ app.get('/api', (req, res) => {
     endpoints: {
       health: '/health',
       auth: '/api/auth',
+      authV1: '/api/v1/auth',
       public: '/api/public',
+      publicV1: '/api/v1/public',
       contacts: '/api/contacts',
+      contactsV1: '/api/v1/contacts',
       devices: '/api/devices',
+      devicesV1: '/api/v1/devices',
       users: '/api/users',
+      usersV1: '/api/v1/users',
       dashboard: '/api/dashboard',
+      dashboardV1: '/api/v1/dashboard',
       settings: '/api/settings',
+      settingsV1: '/api/v1/settings',
     },
   });
 });
 
-// Mount PUBLIC routes first (no auth - for QR code / share links)
-app.use('/api/public', publicRoutes);
+app.get('/api/v1', (req, res) => {
+  res.json({
+    message: 'Kora Contacts Hub API',
+    version: '1.0.0',
+    endpoints: {
+      health: '/health',
+      auth: '/api/v1/auth',
+      public: '/api/v1/public',
+      contacts: '/api/v1/contacts',
+      devices: '/api/v1/devices',
+      users: '/api/v1/users',
+      dashboard: '/api/v1/dashboard',
+      settings: '/api/v1/settings',
+    },
+  });
+});
 
-// Mount protected API routes
-app.use('/api/contacts', contactRoutes);
-app.use('/api/devices', deviceRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/settings', settingsRoutes);
-app.use('/api/bulk-upload', bulkUploadRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/invitations', invitationRoutes);
-app.use('/api/dropdowns', dropdownRoutes);
-app.use('/api/scans', scanRoutes);
+const mountRoutes = (prefix) => {
+  // Mount PUBLIC routes first (no auth - for QR code / share links)
+  app.use(`${prefix}/public`, publicRoutes);
+
+  // Mount protected API routes
+  app.use(`${prefix}/contacts`, contactRoutes);
+  app.use(`${prefix}/devices`, deviceRoutes);
+  app.use(`${prefix}/dashboard`, dashboardRoutes);
+  app.use(`${prefix}/settings`, settingsRoutes);
+  app.use(`${prefix}/bulk-upload`, bulkUploadRoutes);
+  app.use(`${prefix}/users`, userRoutes);
+  app.use(`${prefix}/invitations`, invitationRoutes);
+  app.use(`${prefix}/dropdowns`, dropdownRoutes);
+  app.use(`${prefix}/scans`, scanRoutes);
+};
+
+// Mount both legacy and v1 routes
+mountRoutes('/api');
+mountRoutes('/api/v1');
 
 // Error handling (use src errorHandler so AppError statusCode is respected)
 app.use(errorHandler);
