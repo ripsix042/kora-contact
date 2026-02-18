@@ -17,6 +17,7 @@ import invitationRoutes from './src/routes/invitationRoutes.js';
 import dropdownRoutes from './src/routes/dropdownRoutes.js';
 import publicRoutes from './src/routes/publicRoutes.js';
 import scanRoutes from './src/routes/scanRoutes.js';
+import authRoutes from './backendcontact/routes/authRoutes.js';
 import { errorHandler } from './src/middlewares/errorHandler.js';
 
 
@@ -67,6 +68,10 @@ app.get('/health', (req, res) => {
 });
 
 app.get('/api', (req, res) => {
+  res.redirect(301, '/api/v1');
+});
+
+app.get('/api/v1', (req, res) => {
   res.json({
     message: 'Kora Contacts Hub API',
     version: '1.0.0',
