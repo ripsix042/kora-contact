@@ -1,5 +1,6 @@
 import * as contactService from '../services/contactService.js';
 import * as shareLinkService from '../services/shareLinkService.js';
+import * as scanService from '../services/scanService.js';
 import { AppError } from '../middlewares/errorHandler.js';
 
 export const getAllContacts = async (req, res, next) => {
@@ -39,6 +40,19 @@ export const createShareLink = async (req, res, next) => {
       maxUses,
     });
     res.json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/** GET public contact by ID (share link) - requires ?token=... in query, no auth */
+export const getPublicContactById = async (req, res, next) => {
+  try {
+    const token = req.query?.token;
+    await shareLinkService.consumeShareLink({ contactId: req.params.id, token });
+    const contact = await contactService.getContactById(req.params.id);
+    scanService.logContactScan(req.params.id, req);
+    res.json(contact);
   } catch (error) {
     next(error);
   }

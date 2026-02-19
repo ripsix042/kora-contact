@@ -17,7 +17,7 @@ const shareLinkSchema = new mongoose.Schema(
     expiresAt: {
       type: Date,
       required: true,
-      index: true,
+      // index created by TTL below (schema.index)
     },
     usedAt: {
       type: Date,

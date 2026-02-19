@@ -18,6 +18,7 @@ import userRoutes from './routes/userRoutes.js';
 import invitationRoutes from './routes/invitationRoutes.js';
 import dropdownRoutes from './routes/dropdownRoutes.js';
 import scanRoutes from './routes/scanRoutes.js';
+import publicRoutes from './routes/publicRoutes.js';
 
 const app = express();
 
@@ -67,6 +68,7 @@ app.get('/api', (req, res) => {
       invitations: '/api/v1/invitations',
       dropdowns: '/api/v1/dropdowns',
       scans: '/api/v1/scans',
+      'public-contact': '/api/v1/public/contacts/:id?token=...',
     },
   });
 });
@@ -78,6 +80,7 @@ app.get('/api/v1', (req, res) => {
     endpoints: {
       'okta-login': '/api/v1/auth/okta/login',
       'okta-callback': '/api/v1/auth/okta/callback',
+      'public-contact': '/api/v1/public/contacts/:id?token=...',
       contacts: '/api/v1/contacts',
       devices: '/api/v1/devices',
       users: '/api/v1/users',
@@ -87,12 +90,16 @@ app.get('/api/v1', (req, res) => {
       invitations: '/api/v1/invitations',
       dropdowns: '/api/v1/dropdowns',
       scans: '/api/v1/scans',
+      'public-contact': '/api/v1/public/contacts/:id?token=...',
     },
   });
 });
 
 // Auth (no Okta token required)
 app.use('/api/v1/auth', authRoutes);
+
+// Public (no auth) - share link / QR view
+app.use('/api/v1/public', publicRoutes);
 
 // API v1 (all require Okta Bearer token)
 app.use('/api/v1/contacts', contactRoutes);
