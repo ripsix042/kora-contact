@@ -97,7 +97,6 @@ app.get('/api/v1', (req, res) => {
 app.use('/api/v1/auth', authRoutes);
 
 const mountRoutes = (prefix) => {
-  // Mount PUBLIC routes first (no auth - for QR code / share links)
   app.use(`${prefix}/public`, publicRoutes);
 
   // Mount protected API routes
