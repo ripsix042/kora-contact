@@ -1,4 +1,5 @@
 import * as contactService from '../services/contactService.js';
+import * as shareLinkService from '../services/shareLinkService.js';
 import { AppError } from '../middlewares/errorHandler.js';
 
 export const getAllContacts = async (req, res, next) => {
@@ -18,6 +19,26 @@ export const getContactById = async (req, res, next) => {
   try {
     const contact = await contactService.getContactById(req.params.id);
     res.json(contact);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/** POST /contacts/:id/share-link - create a share link for the contact */
+export const createShareLink = async (req, res, next) => {
+  try {
+    const contactId = req.params.id;
+    await contactService.getContactById(contactId);
+    const createdBy = req.user?.email || req.user?.oktaSub || 'unknown';
+    const ttlSeconds = req.body?.ttlSeconds;
+    const maxUses = req.body?.maxUses;
+    const result = await shareLinkService.createShareLink({
+      contactId,
+      createdBy,
+      ttlSeconds,
+      maxUses,
+    });
+    res.json(result);
   } catch (error) {
     next(error);
   }

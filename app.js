@@ -55,7 +55,9 @@ const authLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+app.use('/api', limiter);
 app.use('/api/v1', limiter);
+app.use('/api/auth', authLimiter);
 app.use('/api/v1/auth', authLimiter);
 
 // Routes
@@ -78,6 +80,30 @@ app.get('/api/v1', (req, res) => {
     version: '1.0.0',
     endpoints: {
       health: '/health',
+      auth: '/api/auth',
+      authV1: '/api/v1/auth',
+      public: '/api/public',
+      publicV1: '/api/v1/public',
+      contacts: '/api/contacts',
+      contactsV1: '/api/v1/contacts',
+      devices: '/api/devices',
+      devicesV1: '/api/v1/devices',
+      users: '/api/users',
+      usersV1: '/api/v1/users',
+      dashboard: '/api/dashboard',
+      dashboardV1: '/api/v1/dashboard',
+      settings: '/api/settings',
+      settingsV1: '/api/v1/settings',
+    },
+  });
+});
+
+app.get('/api/v1', (req, res) => {
+  res.json({
+    message: 'Kora Contacts Hub API',
+    version: '1.0.0',
+    endpoints: {
+      health: '/health',
       auth: '/api/v1/auth',
       public: '/api/v1/public',
       contacts: '/api/v1/contacts',
@@ -85,16 +111,9 @@ app.get('/api/v1', (req, res) => {
       users: '/api/v1/users',
       dashboard: '/api/v1/dashboard',
       settings: '/api/v1/settings',
-      bulkUpload: '/api/v1/bulk-upload',
-      invitations: '/api/v1/invitations',
-      dropdowns: '/api/v1/dropdowns',
-      scans: '/api/v1/scans',
     },
   });
 });
-
-// Auth routes (Okta login/callback) - no auth middleware
-app.use('/api/v1/auth', authRoutes);
 
 const mountRoutes = (prefix) => {
   app.use(`${prefix}/public`, publicRoutes);
@@ -111,7 +130,8 @@ const mountRoutes = (prefix) => {
   app.use(`${prefix}/scans`, scanRoutes);
 };
 
-// Mount API v1 routes only
+// Mount both legacy and v1 routes
+mountRoutes('/api');
 mountRoutes('/api/v1');
 
 // Error handling (use src errorHandler so AppError statusCode is respected)
