@@ -23,6 +23,9 @@ import { errorHandler } from './src/middlewares/errorHandler.js';
 
 const app = express();
 
+// Trust proxy when behind Render/load balancer (needed for correct client IP)
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(helmet());
 

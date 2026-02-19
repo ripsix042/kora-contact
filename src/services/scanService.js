@@ -10,41 +10,85 @@ const UAParser = require('ua-parser-js');
 const getClientIp = (req) => {
   const forwarded = req.headers['x-forwarded-for'];
   if (forwarded) {
-    return typeof forwarded === 'string' ? forwarded.split(',')[0].trim() : forwarded[0];
+    const first = typeof forwarded === 'string' ? forwarded.split(',')[0].trim() : forwarded[0];
+    if (first) return first;
   }
-  return req.ip || req.connection?.remoteAddress || null;
+  const realIp = req.headers['x-real-ip'];
+  if (realIp) return typeof realIp === 'string' ? realIp.trim() : realIp;
+  const raw = req.ip || req.connection?.remoteAddress || null;
+  return raw ? String(raw).trim() : null;
+};
+
+/** Normalize IPv4-mapped IPv6 (::ffff:192.168.1.1) to IPv4 so private check works */
+const normalizeIp = (ip) => {
+  if (!ip) return ip;
+  const s = String(ip).trim();
+  if (s.startsWith('::ffff:')) return s.slice(7);
+  return s;
 };
 
 /** Check if IP is local/private (won't resolve to a real country) */
 const isPrivateIp = (ip) => {
   if (!ip) return true;
-  const s = String(ip).trim();
-  if (s === '127.0.0.1' || s === '::1' || s === '::ffff:127.0.0.1') return true;
+  const s = normalizeIp(ip);
+  if (s === '127.0.0.1' || s === '::1') return true;
   if (s.startsWith('192.168.') || s.startsWith('10.') || s.startsWith('172.16.') || s.startsWith('172.17.') || s.startsWith('172.18.') || s.startsWith('172.19.') || s.startsWith('172.2') || s.startsWith('172.30.') || s.startsWith('172.31.')) return true;
   return false;
 };
 
 /**
- * Fetch approximate location from IP using ip-api.com (free, no key)
+ * Try ip-api.com (free, no key)
+ */
+const tryIpApi = async (ip) => {
+  const res = await fetch(
+    `http://ip-api.com/json/${encodeURIComponent(ip)}?fields=status,country,regionName,city`,
+    { signal: AbortSignal.timeout(4000) }
+  );
+  const data = await res.json();
+  if (data?.status === 'success') {
+    return { country: data.country || null, region: data.regionName || null, city: data.city || null };
+  }
+  return null;
+};
+
+/**
+ * Try ipapi.co as fallback (free tier, no key required for basic)
+ */
+const tryIpApiCo = async (ip) => {
+  const res = await fetch(
+    `https://ipapi.co/${encodeURIComponent(ip)}/json/`,
+    { signal: AbortSignal.timeout(4000) }
+  );
+  const data = await res.json();
+  if (data?.country_name) {
+    return {
+      country: data.country_name || null,
+      region: data.region || null,
+      city: data.city || null,
+    };
+  }
+  return null;
+};
+
+/**
+ * Fetch approximate location from IP. Tries ip-api.com then ipapi.co.
  */
 const fetchLocationFromIp = async (ip) => {
   if (!ip) return { country: 'Unknown', region: null, city: null };
-  if (isPrivateIp(ip)) return { country: 'Local Network', region: null, city: null };
+  const normalized = normalizeIp(ip);
+  if (isPrivateIp(normalized)) return { country: 'Local Network', region: null, city: null };
+  const ipToUse = normalized || ip;
   try {
-    const res = await fetch(
-      `http://ip-api.com/json/${encodeURIComponent(ip)}?fields=status,country,regionName,city`,
-      { signal: AbortSignal.timeout(3000) }
-    );
-    const data = await res.json();
-    if (data?.status === 'success') {
-      return {
-        country: data.country || null,
-        region: data.regionName || null,
-        city: data.city || null,
-      };
-    }
+    const result = await tryIpApi(ipToUse);
+    if (result) return result;
   } catch (err) {
-    console.warn('IP geolocation failed:', err.message);
+    console.warn('IP geolocation (ip-api) failed:', err.message);
+  }
+  try {
+    const result = await tryIpApiCo(ipToUse);
+    if (result) return result;
+  } catch (err) {
+    console.warn('IP geolocation (ipapi.co) failed:', err.message);
   }
   return { country: 'Unknown', region: null, city: null };
 };
